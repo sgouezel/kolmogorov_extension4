@@ -306,7 +306,7 @@ lemma ptraj_eq_prod [∀ n, IsSFiniteKernel (κ n)] (a b : ℕ) : ptraj κ a b =
       nth_rw 1 [← ptraj_comp_ptraj h k.le_succ, hk, ptraj_succ_self, comp_map, comap_map_comm,
         prod_comap, ← id_map_eq_id_comap, map_prod_eq, map_map, this, ← map_map, id_prod_id,
         map_prodAssoc, ← map_map, map_prod, map_id, ← map_comp, map_apply_eq_iff_map_symm_apply_eq,
-        fst_comp_id_prod, map_map, ← coe_IicProdIoc (h.trans k.le_succ), symm_comp_self, map_id,
+        fst_prod_comp_id_prod, map_map, ← coe_IicProdIoc (h.trans k.le_succ), symm_comp_self, map_id,
         deterministic_congr IicProdIoc_comp_restrict₂.symm, ← deterministic_comp_deterministic,
         comp_deterministic_eq_comap, ← prod_comap, ← map_comp, ← comp_map, ← hk,
         ← ptraj_comp_ptraj h k.le_succ, ptraj_succ_self, map_comp, map_comp, map_map, ← id_map,
