@@ -260,23 +260,6 @@ theorem ProbabilityTheory.Kernel.lintegral_id_prod (κ : Kernel X Y) [IsSFiniteK
   rw [lintegral_prod _ _ _ hf, lintegral_id]
   exact hf.lintegral_prod_right'
 
-theorem MeasureTheory.Measure.map_prod (μ : Measure X) [SFinite μ]
-    (ν : Measure Y) [SFinite ν] {f : X → Z} (hf : Measurable f)
-    {g : Y → T} (hg : Measurable g) :
-    (μ.prod ν).map (Prod.map f g) = (μ.map f).prod (ν.map g) := by
-  ext s ms
-  rw [map_apply, prod_apply, prod_apply, lintegral_map]
-  · congr with x
-    rw [map_apply]
-    congr
-    · exact hg
-    · exact measurable_prod_mk_left ms
-  any_goals fun_prop
-  · exact measurable_measure_prod_mk_left ms
-  · exact ms
-  · exact hf.prod_map hg ms
-  · exact ms
-
 theorem MeasureTheory.Measure.map_comp_left
     (μ : Measure X) (κ : Kernel X Y) (f : Y → Z) (mf : Measurable f) :
     (κ ∘ₘ μ).map f = κ.map f ∘ₘ μ := by
@@ -296,7 +279,7 @@ theorem ProbabilityTheory.Kernel.map_prod (κ : Kernel X Y) [IsSFiniteKernel κ]
     {f : Y → Z} (hf : Measurable f) {g : T → U} (hg : Measurable g) :
     (κ ×ₖ η).map (Prod.map f g) = (κ.map f) ×ₖ (η.map g) := by
   ext1 x
-  rw [Kernel.map_apply _ (hf.prod_map hg), Kernel.prod_apply, Measure.map_prod _ _ hf hg,
+  rw [Kernel.map_apply _ (hf.prod_map hg), Kernel.prod_apply, ← Measure.map_prod_map _ _ hf hg,
     Kernel.prod_apply, Kernel.map_apply _ hf, Kernel.map_apply _ hg]
 
 lemma ProbabilityTheory.Kernel.map_prod_eq (κ : Kernel X Y) [IsSFiniteKernel κ]
@@ -351,21 +334,16 @@ theorem ProbabilityTheory.Kernel.id_prod_apply' (η : Kernel X Y) [IsSFiniteKern
   rfl
   exact ms
 
-lemma ProbabilityTheory.Kernel.fst_comp_id_prod (κ : Kernel X Y) [IsSFiniteKernel κ]
-    (η : Kernel (X × Y) T) [IsSFiniteKernel η] :
+lemma ProbabilityTheory.Kernel.fst_prod_comp_id_prod (κ : Kernel X Y) [IsSFiniteKernel κ]
+    (η : Kernel (X × Y) Z) [IsSFiniteKernel η] :
     ((deterministic Prod.fst measurable_fst) ×ₖ η) ∘ₖ (Kernel.id ×ₖ κ) =
     Kernel.id ×ₖ (η ∘ₖ (Kernel.id ×ₖ κ)) := by
   ext x s ms
-  rw [comp_apply', lintegral_id_prod, id_prod_apply', comp_apply', lintegral_id_prod]
-  · congr with y
-    rw [prod_apply, deterministic_apply, Measure.dirac_prod, Measure.map_apply]
-    · exact measurable_prod_mk_left
-    · exact ms
-  · exact η.measurable_coe (measurable_prod_mk_left ms)
-  · exact measurable_prod_mk_left ms
-  · exact ms
-  · exact Kernel.measurable_coe _ ms
-  · exact ms
+  simp_rw [comp_apply' _ _ _ ms, lintegral_id_prod _ _ (Kernel.measurable_coe _ ms),
+    deterministic_prod_apply' _ _ _ ms, id_prod_apply' _ _ ms,
+    comp_apply' _ _ _ (measurable_prod_mk_left ms),
+    lintegral_id_prod _ _ (η.measurable_coe (measurable_prod_mk_left ms))]
+  rfl
 
 lemma MeasurableEquiv.coe_prodAssoc :
     ⇑(MeasurableEquiv.prodAssoc) = ⇑(Equiv.prodAssoc X Y Z) := rfl
@@ -650,12 +628,12 @@ end Measure
 
 section Finset
 
-lemma mem_Ioc_succ {n i : ℕ} : i ∈ Ioc n (n + 1) ↔ i = n + 1 := by
-  rw [mem_Ioc]
+lemma mem_Ioc_succ {n i : ℕ} (h : i ∈ Ioc n (n + 1)) : i = n + 1 := by
+  rw [mem_Ioc] at h
   omega
 
-lemma mem_Ioc_succ' {n : ℕ} (i : Ioc n (n + 1)) : i = ⟨n + 1, mem_Ioc_succ.2 rfl⟩ := by
-  simp [← mem_Ioc_succ.1 i.2]
+lemma mem_Ioc_succ' {n : ℕ} (i : Ioc n (n + 1)) : i = ⟨n + 1, mem_Ioc.2 (by omega)⟩ := by
+  simp [← mem_Ioc_succ i.2]
 
 theorem updateFinset_self {ι : Type*} [DecidableEq ι] {α : ι → Type*} (x : (i : ι) → α i)
     {s : Finset ι} (y : (i : s) → α i) : (fun i : s ↦ updateFinset x s y i) = y := by

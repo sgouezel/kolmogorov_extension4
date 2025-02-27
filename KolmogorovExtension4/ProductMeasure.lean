@@ -199,7 +199,7 @@ lemma Measure.map_piSingleton (μ : (n : ℕ) → Measure (X n)) [∀ n, SigmaFi
   have : Subsingleton (Ioc n (n + 1)) := by
     rw [Nat.Ioc_succ_singleton]
     infer_instance
-  rw [Fintype.prod_subsingleton _ ⟨n + 1, mem_Ioc_succ.2 rfl⟩, Measure.map_apply]
+  rw [Fintype.prod_subsingleton _ ⟨n + 1, mem_Ioc.2 (by omega)⟩, Measure.map_apply]
   · congr with x
     simp only [Set.mem_preimage, Set.mem_pi, Set.mem_univ, forall_const, Subtype.forall,
       Nat.Ioc_succ_singleton, mem_singleton]

@@ -136,7 +136,7 @@ lemma measurable_IocProdIoc {a b c : ℕ} : Measurable (IocProdIoc (X := X) a b 
 
 /-- Identifying `{n + 1}` with `Ioc n (n + 1)`, as a measurable equiv on dependent functions. -/
 def MeasurableEquiv.piSingleton (a : ℕ) : (X (a + 1)) ≃ᵐ ((i : Ioc a (a + 1)) → X i) where
-  toFun := fun x i ↦ (mem_Ioc_succ.1 i.2).symm ▸ x
+  toFun := fun x i ↦ (mem_Ioc_succ i.2).symm ▸ x
   invFun := fun x ↦ x ⟨a + 1, right_mem_Ioc.2 a.lt_succ_self⟩
   left_inv := fun x ↦ by simp
   right_inv := fun x ↦ funext fun i ↦ by cases mem_Ioc_succ' i; rfl
@@ -173,26 +173,6 @@ lemma MeasurableEquiv.coe_IicProdIoc {a b : ℕ} (hab : a ≤ b) :
 lemma MeasurableEquiv.coe_IicProdIoc_symm {a b : ℕ} (hab : a ≤ b) :
     ⇑(IicProdIoc (X := X) hab).symm =
     fun x ↦ (frestrictLe₂ hab x, restrict₂ Ioc_subset_Iic_self x) := rfl
-
-/-- Gluing `Iic a` and `Ioi a` into `ℕ`, version as a measurable equivalence
-on dependent functions. -/
-def MeasurableEquiv.IicProdIoi (a : ℕ) :
-    ((Π i : Iic a, X i) × ((i : Set.Ioi a) → X i)) ≃ᵐ (Π n, X n) where
-  toFun := fun x i ↦ if hi : i ≤ a
-    then x.1 ⟨i, mem_Iic.2 hi⟩
-    else x.2 ⟨i, Set.mem_Ioi.2 (not_le.1 hi)⟩
-  invFun := fun x ↦ (fun i ↦ x i, fun i ↦ x i)
-  left_inv := fun x ↦ by
-    ext i
-    · simp [mem_Iic.1 i.2]
-    · simp [not_le.2 <| Set.mem_Ioi.1 i.2]
-  right_inv := fun x ↦ by simp
-  measurable_toFun := by
-    refine measurable_pi_lambda _ (fun i ↦ ?_)
-    by_cases hi : i ≤ a <;> simp only [Equiv.coe_fn_mk, hi, ↓reduceDIte]
-    · exact measurable_fst.eval
-    · exact measurable_snd.eval
-  measurable_invFun := Measurable.prod_mk (measurable_restrict _) (Set.measurable_restrict _)
 
 end Maps
 
@@ -242,7 +222,7 @@ lemma ptraj_zero :
 lemma ptraj_le_def (hab : a ≤ b) : ptraj κ a b =
     @Nat.leRec a (fun b _ ↦ Kernel (Π i : Iic a, X i) (Π i : Iic b, X i)) Kernel.id
     (fun k _ κ_k ↦ ((Kernel.id ×ₖ ((κ k).map (piSingleton k))) ∘ₖ κ_k).map (IicProdIoc k (k + 1)))
-    b (Nat.le_of_not_le h) := by
+    b hab := by
   obtain rfl | hab := eq_or_lt_of_le hab
   · simp
   · rw [ptraj, dif_neg (not_le.2 hab)]
